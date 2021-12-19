@@ -17,5 +17,7 @@
         <property name="format_sql">true</property>
         <property name="use_sql_comments">true</property>
 
+        <mapping class="ru.job4j.cars.model.User" />
+        <mapping class="ru.job4j.cars.model.Post" />
     </session-factory>
 </hibernate-configuration>
