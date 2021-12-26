@@ -6,9 +6,17 @@ import java.util.List;
 
 public interface PostRepository {
 
-    List<Post> findAllInLastDay();
+    List<Post> findAllWithCarAndUserAndOrderByCreated();
 
-    List<Post> findAllWithPhoto();
+    List<Post> findAllCreateInLastDay();
 
-    List<Post> findAllByBrand(String brand);
+    List<Post> findAllByCarBrandId(int brandId);
+
+    List<Post> findAllByCarBodyTypeId(int bodyTypeId);
+
+    Post savePost(Post post);
+
+    Post findById(int id);
+
+    void delete(Post post);
 }

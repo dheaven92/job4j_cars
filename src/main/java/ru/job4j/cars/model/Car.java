@@ -8,36 +8,41 @@ import javax.persistence.*;
 import java.util.Date;
 
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@ToString
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString
 @Getter
 @Setter
 @Entity
-@Table(name = "post")
-public class Post {
+@Table(name = "car")
+public class Car {
 
     @EqualsAndHashCode.Include
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "car_id")
-    private Car car;
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH})
+    @JoinColumn(name = "brand_id", insertable = false, updatable = false)
+    private Brand brand;
 
-    private String description;
+    @Column(name = "brand_id", nullable = false)
+    private int brandId;
 
-    private boolean sold;
+    @Column(nullable = false)
+    private String model;
 
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH})
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @JoinColumn(name = "body_type_id", insertable = false, updatable = false)
+    private BodyType bodyType;
+
+    @Column(name = "body_type_id", nullable = false)
+    private int bodyTypeId;
 
     @CreationTimestamp
-    @Column(updatable = false)
     @Temporal(TemporalType.TIMESTAMP)
+    @Column(updatable = false)
     private Date created;
 
     @UpdateTimestamp

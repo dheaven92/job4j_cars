@@ -36,10 +36,18 @@ public class PostRepositoryImpl implements PostRepository {
     }
 
     @Override
-    public List<Post> findAllInLastDay() {
+    public List<Post> findAllWithCarAndUserAndOrderByCreated() {
+        return executeTransaction(session ->
+                session.createQuery(
+                        "from Post post join fetch post.car join fetch post.user order by post.created desc"
+                ).list());
+    }
+
+    @Override
+    public List<Post> findAllCreateInLastDay() {
         return executeTransaction(session -> {
             Query<Post> query = session.createQuery(
-                    "from Post post join fetch post.user where post.created > :yesterday"
+                    "from Post post join fetch post.car where post.created > :yesterday"
             );
             query.setParameter("yesterday", new Date(System.currentTimeMillis() - 1000L * 60L * 60L * 24L));
             return query.list();
@@ -47,17 +55,49 @@ public class PostRepositoryImpl implements PostRepository {
     }
 
     @Override
-    public List<Post> findAllWithPhoto() {
-        return executeTransaction(session ->
-                session.createQuery("from Post post where post.photo is not null").list());
+    public List<Post> findAllByCarBrandId(int brandId) {
+        return executeTransaction(session -> {
+            Query<Post> query = session.createQuery(
+                    "from Post post join fetch post.car where post.car.brand.id = :brandId"
+            );
+            query.setParameter("brandId", brandId);
+            return query.list();
+        });
     }
 
     @Override
-    public List<Post> findAllByBrand(String brand) {
+    public List<Post> findAllByCarBodyTypeId(int bodyTypeId) {
         return executeTransaction(session -> {
-            Query<Post> query = session.createQuery("from Post post where post.brand = :brand");
-            query.setParameter("brand", brand);
+            Query<Post> query = session.createQuery(
+                    "from Post post join fetch post.car where post.car.bodyType.id = :bodyTypeId"
+            );
+            query.setParameter("bodyTypeId", bodyTypeId);
             return query.list();
+        });
+    }
+
+    @Override
+    public Post savePost(Post post) {
+        return executeTransaction(session -> {
+            session.saveOrUpdate(post);
+            return post;
+        });
+    }
+
+    @Override
+    public Post findById(int id) {
+        return executeTransaction(session -> {
+            Query<Post> query = session.createQuery("from Post post join fetch post.car where post.id = :id");
+            query.setParameter("id", id);
+            return query.uniqueResult();
+        });
+    }
+
+    @Override
+    public void delete(Post post) {
+        executeTransaction(session -> {
+            session.delete(post);
+            return true;
         });
     }
 
@@ -69,7 +109,7 @@ public class PostRepositoryImpl implements PostRepository {
             transaction.commit();
             return rsl;
         } catch (final Exception e) {
-            session.getTransaction().rollback();
+            transaction.rollback();
             throw e;
         } finally {
             session.close();
